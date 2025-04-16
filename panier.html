@@ -110,8 +110,8 @@
     <div id="total">Total : 0 Fc</div><div class="form-section">
   <h3><i class="fas fa-money-bill"></i> Paiement</h3>
   <p>Envoyez le montant total à :</p>
-  <p><img src="airtelmoney.png" width="80"> Airtel Money : <strong>+243974424713</strong></p>
-  <p><img src="orangemoney.png" width="80"> Orange Money : <strong>+243840641921</strong></p>
+  <p><img src="airtelmoney.png" width="20"> Airtel Money : <strong>+243974424713</strong></p>
+  <p><img src="orangemoney.png" width="20"> Orange Money : <strong>+243840641921</strong></p>
   <p>Joignez la capture de votre paiement :</p>
   <input type="file" id="proof" accept="image/*">
   <button onclick="validerCommande()">
@@ -166,12 +166,6 @@
       localStorage.setItem('panier', JSON.stringify(panier));
       afficherPanier();
     }
-    
-    function updateCartCount() {
-    const count = cart.length;
-    const countElements = document.querySelectorAll("#cart-count");
-    countElements.forEach(el => el.textContent = count);
-    }
 
     function validerCommande() {
       const preuve = document.getElementById('proof').files[0];
@@ -195,9 +189,7 @@
       `;
       receipt.style.display = 'block';
     }
+
     afficherPanier();
-    
-  </script>
-  
-  </body>
+  </script></body>
 </html>
