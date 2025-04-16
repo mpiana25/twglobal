@@ -1,0 +1,156 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin TW GLOBAL</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    .admin-panel, .login {
+      max-width: 500px; margin: auto; background: #fff; padding: 20px;
+      border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input, textarea, select {
+      width: 100%; padding: 10px; margin-bottom: 10px;
+      border: 1px solid #ccc; border-radius: 5px;
+    }
+    button {
+      padding: 10px 15px; background: #007bff; color: #fff;
+      border: none; border-radius: 5px; cursor: pointer;
+    }
+    .product-preview img {
+      width: 60px; height: 60px; object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <div class="login" id="login">
+    <h2>Connexion Admin</h2>
+    <input type="password" id="adminPass" placeholder="Mot de passe">
+    <button onclick="login()">Connexion</button>
+  </div>
+
+  <div class="admin-panel" id="adminPanel" style="display:none;">
+    <h2>Ajouter un produit</h2>
+    <input type="text" id="prodName" placeholder="Nom du produit">
+    <input type="number" id="prodPrice" placeholder="Prix (Fc)">
+    <textarea id="prodDesc" placeholder="Description"></textarea>
+    <select id="prodCat">
+      <option value="sport">Sport</option>
+      <option value="technologies">Technologies</option>
+      <option value="papeterie">Papeterie</option>
+    </select>
+    <input type="file" id="prodImage" accept="image/*">
+    <button onclick="ajouterProduit()">Ajouter</button>
+
+    <h3>Produits ajoutés</h3>
+    <div id="productList"></div>
+  </div>
+<script>
+  const PASSWORD = "twadmin2024";
+  let editIndex = null;
+
+  function login() {
+    const pass = document.getElementById("adminPass").value;
+    if (pass === PASSWORD) {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("adminPanel").style.display = "block";
+      afficherProduits();
+    } else {
+      alert("Mot de passe incorrect !");
+    }
+  }
+
+  function ajouterProduit() {
+    const nom = document.getElementById("prodName").value;
+    const prix = parseInt(document.getElementById("prodPrice").value);
+    const desc = document.getElementById("prodDesc").value;
+    const cat = document.getElementById("prodCat").value;
+    const imageInput = document.getElementById("prodImage");
+    const imageFile = imageInput.files[0];
+
+    if (!nom || !prix || !desc || !cat || (editIndex === null && !imageFile)) {
+      alert("Tous les champs sont requis !");
+      return;
+    }
+
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const base64Image = e.target.result;
+        enregistrerProduit(nom, prix, desc, cat, base64Image);
+      };
+      reader.readAsDataURL(imageFile);
+    } else {
+      const produits = JSON.parse(localStorage.getItem("produits") || "[]");
+      const imageExistante = produits[editIndex].image;
+      enregistrerProduit(nom, prix, desc, cat, imageExistante);
+    }
+  }
+
+  function enregistrerProduit(nom, prix, desc, cat, image) {
+    let produits = JSON.parse(localStorage.getItem("produits") || "[]");
+    const produit = { nom, prix, description: desc, categorie: cat, image };
+
+    if (editIndex !== null) {
+      produits[editIndex] = produit;
+      editIndex = null;
+    } else {
+      produits.push(produit);
+    }
+
+    localStorage.setItem("produits", JSON.stringify(produits));
+    resetFormulaire();
+    afficherProduits();
+  }
+
+  function afficherProduits() {
+    const produits = JSON.parse(localStorage.getItem("produits") || "[]");
+    const list = document.getElementById("productList");
+    list.innerHTML = "";
+    produits.forEach((p, i) => {
+      list.innerHTML += `
+        <div class="product-preview">
+          <strong>${p.nom}</strong><br>
+          <img src="${p.image}" alt="${p.nom}" width="60"><br>
+          ${p.prix} Fc - ${p.categorie}<br>
+          <em>${p.description}</em><br>
+          <button onclick="modifierProduit(${i})">Modifier</button>
+          <button onclick="supprimerProduit(${i})">Supprimer</button>
+        </div><hr>
+      `;
+    });
+  }
+
+  function supprimerProduit(index) {
+    let produits = JSON.parse(localStorage.getItem("produits") || "[]");
+    if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
+      produits.splice(index, 1);
+      localStorage.setItem("produits", JSON.stringify(produits));
+      afficherProduits();
+    }
+  }
+
+  function modifierProduit(index) {
+    const produits = JSON.parse(localStorage.getItem("produits") || "[]");
+    const p = produits[index];
+    document.getElementById("prodName").value = p.nom;
+    document.getElementById("prodPrice").value = p.prix;
+    document.getElementById("prodDesc").value = p.description;
+    document.getElementById("prodCat").value = p.categorie;
+    document.getElementById("prodImage").value = ""; // Nouvelle image facultative
+    editIndex = index;
+    window.scrollTo(0, 0);
+  }
+
+  function resetFormulaire() {
+    document.getElementById("prodName").value = "";
+    document.getElementById("prodPrice").value = "";
+    document.getElementById("prodDesc").value = "";
+    document.getElementById("prodCat").value = "sport";
+    document.getElementById("prodImage").value = "";
+    editIndex = null;
+  }
+</script>
+</body>
+</html>

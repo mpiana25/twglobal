@@ -5,6 +5,9 @@
   <title>TW GLOBAL - Technologie & Créativité</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     * {margin: 0; padding: 0; box-sizing: border-box;}
     body {font-family: 'Montserrat', sans-serif; background-color: #f4f4f4; color: #333;}
@@ -344,6 +347,115 @@
     border-radius: 12px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
+    .featured-section {
+    padding: 2rem;
+    background: #f1f1f1;
+    text-align: center;
+    }
+    
+    .featured-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    }
+    
+    .carousel-wrapper {
+    overflow: hidden;
+    position: relative;
+    }
+    
+    .product-carousel {
+    display: flex;
+    gap: 1rem;
+    animation: scrollProducts 40s linear infinite;
+    }
+    
+    .product-slide {
+    min-width: 250px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+    }
+    
+    .product-slide img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    }
+    
+    .product-slide .info {
+    padding: 1rem;
+    }
+    
+    .product-slide .info h3 {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    color: #444;
+    }
+    
+    .btn-whatsapp {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #25D366;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    }
+    
+    .btn-whatsapp:hover {
+    background-color: #1ebe57;
+    }
+    
+    @keyframes scrollProducts {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+    }
+    
+    @media screen and (max-width: 768px) {
+    .product-carousel {
+    animation: none;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    }
+    
+    .product-slide {
+    scroll-snap-align: start;
+    min-width: 80%;
+    }
+    .btn-panier {
+    background: linear-gradient(to right, #007bff, #0056b3);
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s ease;
+    }
+    .btn-panier:hover {
+    background: linear-gradient(to right, #0056b3, #004494);
+    }
+    .product-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    padding: 20px;
+    }
+    .product-slide {
+    min-width: 220px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    padding: 10px;
+    }
     
   </style>
 </head>
@@ -357,6 +469,7 @@
     <a href="#accueil"><i class="fas fa-home"></i> Accueil</a>
     <a href="#apropos"><i class="fas fa-info-circle"></i> À propos</a>
     <a href="#services"><i class="fas fa-cogs"></i> Services</a>
+    <a href="catalogue.html"><i class="fas fa-smile"></i> Catalogue</a>
     <a href="#temoignages"><i class="fas fa-comment-dots"></i> Témoignages</a>
     <a href="#contact"><i class="fas fa-envelope"></i> Contact</a>
   </nav>
@@ -414,6 +527,151 @@
  </script>
   
 </section>
+<section id="produits-en-vedette" class="featured-section">
+  <h2><i class="fas fa-tags"></i> Nos Produits en Vedette</h2>
+  <div class="carousel-wrapper">
+    <div class="product-carousel" id="carousel-dynamique"></div>
+  <script>
+  const carousel = document.getElementById("carousel-dynamique");
+  const produitsVedette = JSON.parse(localStorage.getItem("produits")) || [];
+  
+  produitsVedette.forEach(prod => {
+  carousel.innerHTML += `
+  <div class="product-slide">
+  <img src="${prod.image}" alt="${prod.nom}">
+  <div class="info">
+  <h3>${prod.nom}</h3>
+  <p>Prix : ${prod.prix.toLocaleString()} Fc</p>
+  <button class="btn-panier" onclick="addToCart('${prod.nom}', ${prod.prix}, \`${prod.image}\`)">
+  <i class="fas fa-cart-plus"></i> Ajouter au panier
+  </button>
+  </div>
+  </div>`;
+  });
+  </script>
+  </div>
+</section>
+
+<script>
+const carousel = document.getElementById("carousel-dynamique");
+
+fetch("catalogue.json")
+  .then(res => res.json())
+  .then(produits => {
+    produits.forEach(prod => {
+      carousel.innerHTML += `
+        <div class="product-slide">
+          <img src="${prod.image}" alt="${prod.nom}">
+          <div class="info">
+            <h3>${prod.nom}</h3>
+            <p>Prix : ${prod.prix.toLocaleString()} Fc</p>
+            <button class="btn-panier" onclick="addToCart('${prod.nom}', ${prod.prix}, '${prod.image}')">
+              <i class="fas fa-cart-plus"></i> Ajouter au panier
+            </button>
+          </div>
+        </div>`;
+    });
+  });
+</script>
+
+  <!-- BOUTON POUR VOIR TOUS LES PRODUITS -->
+  <div style="margin-top: 2rem;">
+    <a href="catalogue.html" class="btn-whatsapp" style="background-color: #333;">
+      <i class="fas fa-eye"></i> Voir tous les produits
+    </a>
+  </div>
+</section>
+
+<a href="panier.html" id="floating-cart" style="
+  position: top;
+  bottom: 20px;
+  right: 20px;
+  background: #007bff;
+  color: white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  z-index: 1000;
+">
+  <i class="fas fa-shopping-cart"></i>
+  <div id="cart-count" style="
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;">0</div>
+</a>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const productList = document.getElementById('product-list');
+  const cart = JSON.parse(localStorage.getItem('panier')) || [];
+
+  // Charger les produits depuis le fichier JSON
+  fetch('catalogue.json')
+    .then(res => res.json())
+    .then(produits => {
+      produits.forEach(prod => {
+        const produitHTML = `
+          <div class="product">
+            <img src="${prod.image}" alt="${prod.nom}" style="width:100%; height:200px; object-fit:cover">
+            <div class="product-info">
+              <h4>${prod.nom}</h4>
+              <p>${prod.description}</p>
+              <p><strong>${prod.prix.toLocaleString()} Fc</strong></p>
+              <button class="btn-panier" onclick="addToCart('${prod.nom}', ${prod.prix}, '${prod.image}')">
+                <i class="fas fa-cart-plus"></i> Ajouter au panier
+              </button>
+            </div>
+          </div>
+        `;
+        productList.innerHTML += produitHTML;
+      });
+    });
+
+  // Ajouter un produit au panier
+  window.addToCart = function(nom, prix, image) {
+    const exist = cart.find(p => p.nom === nom);
+    if (exist) {
+      Toastify({
+        text: "Produit déjà dans le panier !",
+        backgroundColor: "#e74c3c",
+        duration: 3000
+      }).showToast();
+      return;
+    }
+
+    cart.push({ nom, prix, image, quantite: 1 });
+    localStorage.setItem('panier', JSON.stringify(cart));
+    Toastify({
+      text: "Produit ajouté au panier !",
+      backgroundColor: "#28a745",
+      duration: 3000
+    }).showToast();
+
+    updateCartCount();
+  }
+
+  // Mettre à jour le compteur
+  function updateCartCount() {
+    const countEl = document.querySelectorAll('#cart-count');
+    countEl.forEach(el => el.textContent = cart.length);
+  }
+
+  updateCartCount();
+});
+</script>
+
 <section id="choisir" class="why-choose-us">
   <h2>Pourquoi nous choisir ?</h2>
   <div class="reasons">
@@ -786,6 +1044,33 @@ document.querySelectorAll('.stat').forEach(stat => {
 
       window.open(url, '_blank');
     });
+    
+  </script>
+  <script>
+  // Met à jour le compteur du panier à partir du localStorage
+  function updateCartCount() {
+  const cart = JSON.parse(localStorage.getItem('panier')) || [];
+  document.querySelectorAll('#cart-count').forEach(el => {
+  el.textContent = cart.length;
+  });
+  }
+  
+  // Fonction d'ajout au panier
+  function addToCart(nom, prix, image) {
+  let cart = JSON.parse(localStorage.getItem('panier')) || [];
+  const exists = cart.find(p => p.nom === nom);
+  if (exists) {
+  alert("Ce produit est déjà dans le panier !");
+  return;
+  }
+  cart.push({ nom, prix, image, quantite: 1 });
+  localStorage.setItem('panier', JSON.stringify(cart));
+  updateCartCount();
+  alert("Produit ajouté au panier !");
+  }
+  
+  // Appelé au chargement
+  document.addEventListener('DOMContentLoaded', updateCartCount);
   </script>
 <section id="contact" class="contact">
   <h2>Contactez-nous</h2>
@@ -794,7 +1079,10 @@ document.querySelectorAll('.stat').forEach(stat => {
   <p><strong>WhatsApp :</strong> Cliquez sur l'un des boutons dans les services pour discuter avec nous !</p>
 </section><a href="https://wa.me/243974424713" class="floating-whatsapp" title="Discuter sur WhatsApp">
   <i class="fab fa-whatsapp"></i>
-</a><footer>
+</a>
+<footer>
   <p>© 2025 TW GLOBAL - Tous droits réservés.</p>
-</footer></body>
+</footer>
+
+</body>
 </html>
