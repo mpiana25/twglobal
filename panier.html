@@ -168,26 +168,56 @@
     }
 
     function validerCommande() {
-      const preuve = document.getElementById('proof').files[0];
-      if (!preuve) {
-        alert('Veuillez insérer une preuve de paiement.');
-        return;
-      }
-      const total = panier.reduce((t, p) => t + p.prix * p.quantite, 0);
-      const heure = new Date().toLocaleString();
-      const detail = panier.map(p => `- ${p.nom} x${p.quantite} = ${(p.prix*p.quantite).toLocaleString()} Fc`).join('<br>');
-
-      const receipt = document.getElementById('receipt');
-      receipt.innerHTML = `
-        <h3>TW GLOBAL TRADING</h3>
-        <p><strong>Reçu d'achat</strong></p>
-        <p>Contact : +243974424713 / +243840641921</p>
-        <p>${detail}</p>
-        <p><strong>Total : ${total.toLocaleString()} Fc</strong></p>
-        <p><em>Date : ${heure}</em></p>
-        <button onclick="window.print()"><i class='fas fa-print'></i> Imprimer le reçu</button>
-      `;
-      receipt.style.display = 'block';
+    const preuve = document.getElementById('proof').files[0];
+    if (!preuve) {
+    alert('Veuillez insérer une preuve de paiement.');
+    return;
+    }
+    
+    const total = panier.reduce((t, p) => t + p.prix * p.quantite, 0);
+    const heure = new Date().toLocaleString();
+    const numeroCommande = "TW-" + new Date().getTime(); // identifiant unique
+    const detailTexte = panier.map(p => `- ${p.nom} x${p.quantite} = ${(p.prix * p.quantite).toLocaleString()} Fc`).join('\n');
+    
+    // Message WhatsApp professionnel
+    const message = `Bonjour TW GLOBAL TRADING,
+    
+    Voici les détails de ma commande :
+    
+    Numéro de commande : ${numeroCommande}
+    Date : ${heure}
+    
+    ${detailTexte}
+    
+    Total : ${total.toLocaleString()} Fc
+    
+    J’ai envoyé la preuve de paiement via ce formulaire. Merci de me confirmer la réception.
+    
+    Cordialement.`
+    
+    // Affichage du reçu
+    const receipt = document.getElementById('receipt');
+    receipt.innerHTML = `
+    <h3>TW GLOBAL TRADING</h3>
+    <p><strong>Reçu d'achat</strong></p>
+    <p>Numéro de commande : ${numeroCommande}</p>
+    <p>Contact : +243974424713 / +243840641921</p>
+    <p>${detailTexte.replace(/\n/g, '<br>')}</p>
+    <p><strong>Total : ${total.toLocaleString()} Fc</strong></p>
+    <p><em>Date : ${heure}</em></p>
+    <p style="font-style:italic; margin-top:10px; color:#333;">Merci pour votre commande ! Nous vous contacterons sous peu. Livraison dans un délai de 30 jours ouvrables.</p>
+    <button onclick="window.print()"><i class='fas fa-print'></i> Imprimer le reçu</button>
+    `;
+    receipt.style.display = 'block';
+    
+    // Vider le panier
+    localStorage.removeItem('panier');
+    
+    // Redirection vers WhatsApp
+    const whatsappURL = `https://wa.me/243974424713?text=${encodeURIComponent(message)}`;
+    setTimeout(() => {
+    window.location.href = whatsappURL;
+    }, 1000); // Laisser le temps au reçu de s'afficher
     }
 
     afficherPanier();
