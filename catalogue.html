@@ -289,6 +289,16 @@
     cursor: not-allowed;
     box-shadow: none;
     }
+    @keyframes bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.4); }
+    60% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+    }
+    
+    .cart-animate {
+    animation: bounce 0.4s ease;
+    }
     </style>
   </style>
 </head>
@@ -352,90 +362,16 @@
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>  <script>
     window.onload = () => {
     updateCartCount();
+    afficherProduitsPage(pageActuelle);
     };
-   const produits = JSON.parse(localStorage.getItem("produits")) || [];
+ 
 
     let cart = JSON.parse(localStorage.getItem('panier')) || [];
     updateCartCount();
 
     const productList = document.getElementById("product-list");
 
-    function afficherProduits(liste) {
-      productList.innerHTML = "";
-      liste.forEach(prod => {
-        const produitHTML = `
-          <div class="product" data-categorie="${prod.categorie}">
-            <img src="${prod.image}" alt="${prod.nom}">
-            <div class="product-info">
-              <h4>${prod.nom}</h4>
-              <p>${prod.description}</p>
-              <p class="price">${prod.prix.toLocaleString()} Fc</p>
-              <input class="quantity-input" id="qty-${prod.nom}" type="number" min="1" value="1">
-              <button class="btn-panier" onclick="addToCart('${prod.nom}', ${prod.prix}, '${prod.image}')">
-                <i class="fas fa-cart-plus"></i> Ajouter
-              </button>
-            </div>
-          </div>
-        `;
-        productList.innerHTML += produitHTML;
-      });
-    }
-function addToCart(nom, prix, image) {
-  const qtyInput = document.getElementById(`qty-${nom}`);
-  const quantite = parseInt(qtyInput.value);
-
-  const item = cart.find(p => p.nom === nom);
-  if (item) {
-    Toastify({
-      text: "Ce produit est déjà dans le panier !",
-      backgroundColor: "#dc3545",
-      duration: 3000
-    }).showToast();
-    return;
-  }
-
-  cart.push({ nom, prix, image, quantite });
-  localStorage.setItem('panier', JSON.stringify(cart));
-  Toastify({
-    text: "Produit ajouté au panier !",
-    backgroundColor: "green",
-    duration: 3000
-  }).showToast();
-  updateCartCount();
-}
-
-
-    function updateCartCount() {
-    const count = cart.length;
-    const headerCount = document.getElementById("cart-count-header");
-    const floatCount = document.getElementById("cart-count-float");
-    
-    if (headerCount) headerCount.textContent = count;
-    if (floatCount) floatCount.textContent = count;
-    }
-
-    function openCart() {
-      let contenu = cart.map(p => `${p.nom} x ${p.quantite} = ${(p.prix * p.quantite).toLocaleString()} Fc`).join("\n");
-      alert("Panier:\n" + contenu);
-    }
-
-    document.getElementById("search").addEventListener("input", () => {
-      const search = document.getElementById("search").value.toLowerCase();
-      const category = document.getElementById("categoryFilter").value;
-      const filtered = produits.filter(p =>
-        (p.nom.toLowerCase().includes(search) || p.description.toLowerCase().includes(search)) &&
-        (category === "" || p.categorie === category)
-      );
-      afficherProduits(filtered);
-    });
-
-    document.getElementById("categoryFilter").addEventListener("change", () => {
-      document.getElementById("search").dispatchEvent(new Event("input"));
-    });
-
-    afficherProduits(produits);
-    
-  </script>
+</script>
   <h1 onclick="goAdmin()" style="cursor:pointer;"><i class="fas fa-globe"></i> TW GLOBAL</h1>
   
   <script>
@@ -449,7 +385,7 @@ function addToCart(nom, prix, image) {
   }
   </script>
   <script>
-  let produitsParPage = 6;
+  let produitsParPage = 5;
   let pageActuelle = 1;
   let produits = JSON.parse(localStorage.getItem('produits')) || [];
   
@@ -462,6 +398,7 @@ function addToCart(nom, prix, image) {
   let pageProduits = produits.slice(debut, fin);
   
   pageProduits.forEach(prod => {
+  const nomSanitize = prod.nom.replace(/\s+/g, '_'); // pour id unique
   const div = document.createElement('div');
   div.className = 'product';
   div.innerHTML = `
@@ -470,7 +407,8 @@ function addToCart(nom, prix, image) {
   <h4>${prod.nom}</h4>
   <p>${prod.description}</p>
   <p class="price">${prod.prix.toLocaleString()} Fc</p>
-  <button class="btn-panier" onclick="addToCart('${prod.nom}', ${prod.prix}, '${prod.image}')">
+  <input class="quantity-input" id="qty-${nomSanitize}" type="number" min="1" value="1">
+  <button class="btn-panier" onclick="addToCart('${prod.nom}', ${prod.prix}, '${prod.image}', 'qty-${nomSanitize}')">
   <i class="fas fa-cart-plus"></i> Ajouter au panier
   </button>
   </div>
@@ -478,24 +416,120 @@ function addToCart(nom, prix, image) {
   list.appendChild(div);
   });
   
-  // Gérer les boutons de pagination
   document.getElementById("prevBtn").disabled = (page === 1);
   document.getElementById("nextBtn").disabled = (page >= Math.ceil(produits.length / produitsParPage));
   document.getElementById("pageNumber").innerText = page;
   }
-  
-  function changerPage(direction) {
-  pageActuelle += direction;
-  afficherProduitsPage(pageActuelle);
-  }
-  
   window.addEventListener("DOMContentLoaded", () => {
   afficherProduitsPage(pageActuelle);
   });
+  function afficherProduitsPageFiltrée(liste) {
+  const list = document.getElementById("product-list");
+  list.innerHTML = "";
+  
+  let debut = (pageActuelle - 1) * produitsParPage;
+  let fin = debut + produitsParPage;
+  let pageProduits = liste.slice(debut, fin);
+  
+  pageProduits.forEach(prod => {
+  const nomSanitize = prod.nom.replace(/\s+/g, '_');
+  const div = document.createElement('div');
+  div.className = 'product';
+  div.innerHTML = `
+  <img src="${prod.image}" alt="${prod.nom}">
+  <div class="product-info">
+  <h4>${prod.nom}</h4>
+  <p>${prod.description}</p>
+  <p class="price">${prod.prix.toLocaleString()} Fc</p>
+  <input class="quantity-input" id="qty-${nomSanitize}" type="number" min="1" value="1">
+  <button class="btn-panier" onclick="addToCart('${prod.nom}', ${prod.prix}, '${prod.image}', 'qty-${nomSanitize}')">
+  <i class="fas fa-cart-plus"></i> Ajouter au panier
+  </button>
+  </div>
+  `;
+  list.appendChild(div);
+  });
+  
+  document.getElementById("prevBtn").disabled = (pageActuelle === 1);
+  document.getElementById("nextBtn").disabled = (pageActuelle >= Math.ceil(liste.length / produitsParPage));
+  document.getElementById("pageNumber").innerText = pageActuelle;
+  }
+  let produitsFiltres = produits;
+  
+  document.getElementById("search").addEventListener("input", filtrerEtAfficher);
+  document.getElementById("categoryFilter").addEventListener("change", filtrerEtAfficher);
+  
+  function filtrerEtAfficher() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const category = document.getElementById("categoryFilter").value;
+  produitsFiltres = produits.filter(p =>
+  (p.nom.toLowerCase().includes(search) || p.description.toLowerCase().includes(search)) &&
+  (category === "" || p.categorie === category)
+  );
+  pageActuelle = 1;
+  afficherProduitsPageFiltrée(produitsFiltres);
+  }
+  function addToCart(nom, prix, image, qtyId) {
+  const qtyInput = document.getElementById(qtyId);
+  const quantite = parseInt(qtyInput.value);
+  
+  let cart = JSON.parse(localStorage.getItem("panier")) || [];
+  const item = cart.find(p => p.nom === nom);
+  
+  if (item) {
+  Toastify({
+  text: "Ce produit est déjà dans le panier !",
+  backgroundColor: "#dc3545",
+  duration: 3000
+  }).showToast();
+  return;
+  }
+  
+  cart.push({ nom, prix, image, quantite });
+  localStorage.setItem("panier", JSON.stringify(cart));
+  
+  // Lecture du son
+  const sound = document.getElementById("cart-sound");
+  if (sound) sound.play();
+  
+  Toastify({
+  text: "Produit ajouté au panier !",
+  backgroundColor: "green",
+  duration: 3000
+  }).showToast();
+  
+  updateCartCount();
+  }
+  
+  function changerPage(direction) {
+  pageActuelle += direction;
+  afficherProduitsPageFiltrée(produitsFiltres);
+  }
+  function updateCartCount() {
+  const cart = JSON.parse(localStorage.getItem("panier")) || [];
+  const count = cart.length;
+  
+  const headerCount = document.getElementById("cart-count-header");
+  const floatCount = document.getElementById("cart-count-float");
+  
+  if (headerCount) {
+  headerCount.textContent = count;
+  headerCount.classList.add("cart-animate");
+  setTimeout(() => headerCount.classList.remove("cart-animate"), 400);
+  }
+  
+  if (floatCount) {
+  floatCount.textContent = count;
+  floatCount.classList.add("cart-animate");
+  setTimeout(() => floatCount.classList.remove("cart-animate"), 400);
+  }
+  }
+  
   </script>
   
   <footer>
   <p>© 2025 TW GLOBAL - Tous droits réservés.</p>
   </footer>
+  <audio id="cart-sound" src="click.mp3" preload="auto"></audio>
   </body>
 </html>
