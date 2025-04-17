@@ -5,22 +5,37 @@
   <title>Panier - TW GLOBAL</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f0f5;
-    }
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {font-family: 'Montserrat', sans-serif; background-color: #f4f4f4; color: #333;}
     header {
-      background-color: #1a1a2e;
+    position: fixed;
+      background-color: #0d47a1;
       color: white;
       padding: 20px;
       text-align: center;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 1rem 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    footer {
+    
+    background-color: #0d47a1;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    main {
+    padding-top: 160px;
     }
     .container {
       padding: 20px;
       max-width: 900px;
       margin: auto;
+      padding-top:160px;
     }
     h2 {
       text-align: center;
@@ -105,15 +120,18 @@
 <body>
   <header>
     <h1><i class="fas fa-shopping-cart"></i> Votre Panier</h1>
-  </header>  <div class="container">
+  </header>  
+  
+  <div class="container">
     <div id="cart-list"></div>
     <div id="total">Total : 0 Fc</div><div class="form-section">
   <h3><i class="fas fa-money-bill"></i> Paiement</h3>
-  <p>Envoyez le montant total à :</p>
-  <p><img src="airtelmoney.png" width="20"> Airtel Money : <strong>+243974424713</strong></p>
-  <p><img src="orangemoney.png" width="20"> Orange Money : <strong>+243840641921</strong></p>
-  <p>Joignez la capture de votre paiement :</p>
-  <input type="file" id="proof" accept="image/*">
+  <p><strong>Veuillez copier l’un des numéros ci-dessous et effectuer le paiement du montant total via Airtel Money ou Orange Money afin de valider votre commande.</strong><br>
+  
+  Une fois le paiement effectué, veuillez nous transmettre la preuve de paiement pour confirmation.</p>
+  <p><img src="airtelmoney.png" width="80"> Airtel Money : <strong>+243974424713</strong></p>
+  <p><img src="orangemoney.png" width="80"> Orange Money : <strong>+243840641921</strong></p>
+ 
   <button onclick="validerCommande()">
     <i class="fab fa-whatsapp"></i> Valider votre achat
   </button>
@@ -168,58 +186,47 @@
     }
 
     function validerCommande() {
-    const preuve = document.getElementById('proof').files[0];
-    if (!preuve) {
-    alert('Veuillez insérer une preuve de paiement.');
+    if (!panier.length) {
+    alert("Votre panier est vide.");
     return;
     }
     
+    const confirmation = confirm("Votre commande est en attente.\nVeuillez nous envoyer la capture de votre preuve de paiement à l’un de nos deux numéros WhatsApp.\n\nSouhaitez-vous confirmer la commande ?");
+    
+    if (!confirmation) return;
+    
     const total = panier.reduce((t, p) => t + p.prix * p.quantite, 0);
     const heure = new Date().toLocaleString();
-    const numeroCommande = "TW-" + new Date().getTime(); // identifiant unique
+    const numeroCommande = "TW-" + new Date().getTime();
     const detailTexte = panier.map(p => `- ${p.nom} x${p.quantite} = ${(p.prix * p.quantite).toLocaleString()} Fc`).join('\n');
     
-    // Message WhatsApp professionnel
     const message = `Bonjour TW GLOBAL TRADING,
     
-    Voici les détails de ma commande :
+    Je viens de valider une commande sur le site.
     
     Numéro de commande : ${numeroCommande}
     Date : ${heure}
     
+    Détails de la commande :
     ${detailTexte}
     
     Total : ${total.toLocaleString()} Fc
     
-    J’ai envoyé la preuve de paiement via ce formulaire. Merci de me confirmer la réception.
+    Veuillez trouver ci-joint la capture de ma preuve de paiement. Merci de confirmer la réception.
     
     Cordialement.`
-    
-    // Affichage du reçu
-    const receipt = document.getElementById('receipt');
-    receipt.innerHTML = `
-    <h3>TW GLOBAL TRADING</h3>
-    <p><strong>Reçu d'achat</strong></p>
-    <p>Numéro de commande : ${numeroCommande}</p>
-    <p>Contact : +243974424713 / +243840641921</p>
-    <p>${detailTexte.replace(/\n/g, '<br>')}</p>
-    <p><strong>Total : ${total.toLocaleString()} Fc</strong></p>
-    <p><em>Date : ${heure}</em></p>
-    <p style="font-style:italic; margin-top:10px; color:#333;">Merci pour votre commande ! Nous vous contacterons sous peu. Livraison dans un délai de 30 jours ouvrables.</p>
-    <button onclick="window.print()"><i class='fas fa-print'></i> Imprimer le reçu</button>
-    `;
-    receipt.style.display = 'block';
     
     // Vider le panier
     localStorage.removeItem('panier');
     
-    // Redirection vers WhatsApp
+    // Rediriger sur WhatsApp
     const whatsappURL = `https://wa.me/243974424713?text=${encodeURIComponent(message)}`;
-    setTimeout(() => {
     window.location.href = whatsappURL;
-    }, 1000); // Laisser le temps au reçu de s'afficher
     }
-
     afficherPanier();
-  </script></body>
+  </script>
+  <footer>
+  <p>© 2025 TW GLOBAL - Tous droits réservés.</p>
+  </footer>
+  </body>
 </html>
