@@ -13,12 +13,25 @@
       background-color: #f8f9fa;
     }
     header {
-      background-color: #1a1a2e;
-      color: white;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    position: fixed;
+    background-color: #0d47a1;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    footer {
+    
+    background-color: #0d47a1;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     header h1 {
       font-size: 24px;
@@ -427,7 +440,7 @@ function addToCart(nom, prix, image) {
   
   <script>
   function goAdmin() {
-  let pass = prompt("Entrer le mot de passe admin:");
+  let pass = prompt("Contactez le Developpeur:");
   if (pass === "twadmin2024") {
   window.location.href = 'admin.html';
   } else {
@@ -480,5 +493,9 @@ function addToCart(nom, prix, image) {
   afficherProduitsPage(pageActuelle);
   });
   </script>
+  
+  <footer>
+  <p>© 2025 TW GLOBAL - Tous droits réservés.</p>
+  </footer>
   </body>
 </html>
